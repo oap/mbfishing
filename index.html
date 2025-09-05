@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manitoba Fishing Tips</title>
+    <!--
+    Design Notes:
+    - Assumptions: Comprehensive Manitoba fishing regulations data included. Master Angler lengths are for recognition programs. Always verify current local regulations. Images are placeholders; replace with actual fish images.
+    - Limitations: No server-side data; all data is in-memory JS array. Favorites persist in localStorage but are not synced.
+    - Data Model: JS array of objects with schema: {id, commonName, scientificName?, chineseName?, imageUrl, quota: {possessionLimit, sizeRestriction?, season?, notes?}, tips: string[], conservation?, masterAnglerLength?}
+      - To port to Angular: Create a FishCardComponent with @Input() fish: Fish; @Output() favoriteToggled = new EventEmitter<string>(); Use ngFor for list, *ngIf for optional fields.
+    - Angular Porting: JS functions map to component methods: renderFishList -> ngOnInit/ngOnChanges, renderCard -> template, attachEvents -> ngAfterViewInit. Use data-id for bindings.
+    - Image Replacement: Update imageUrl in data array with actual URLs. Add onerror handler for fallbacks.
+    -->
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+            --spacing: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background-color: var(--light-bg);
+            padding: var(--spacing);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        .search-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        #search {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            main {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            main {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .fish-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .fish-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .fish-card__image-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .fish-card__image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .fish-card__content {
+            padding: var(--spacing);
+        }
+
+        .fish-card__header {
+            margin-bottom: 0.5rem;
+        }
+
+        .fish-card__common-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .fish-card__scientific-name {
+            font-style: italic;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .fish-card__chinese-name {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .fish-card__region {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .fish-card__quota-badge {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .fish-card__quota-summary {
+            font-weight: bold;
+        }
+
+        .fish-card__quota-details {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .fish-card__quota-details--expanded {
+            max-height: 200px;
+        }
+
+        .fish-card__tips {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .fish-card__tip {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .fish-card__tip::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+        }
+
+        .fish-card__conservation {
+            background: var(--warning-color);
+            color: var(--dark-text);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .fish-card__actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fish-card__favorite {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .fish-card__favorite--active {
+            color: var(--warning-color);
+        }
+
+        .fish-card__details-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .fish-card__details-toggle:hover {
+            background-color: #0056b3;
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-top: 2rem;
+        }
+
+        /* Focus styles */
+        #search:focus,
+        .fish-card__favorite:focus,
+        .fish-card__details-toggle:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Placeholder image */
+        .placeholder-image {
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Manitoba Fishing Tips</h1>
+        <p>For official regulations, refer to the <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></p>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search Manitoba fish species..." aria-label="Search fish cards">
+        </div>
+    </header>
+    <main id="fish-cards-container">
+        <!-- Cards will be rendered here -->
+    </main>
+    <div class="disclaimer">
+        Always verify current Manitoba fishing regulations. Quota information is for demonstration purposes only. Consult the official <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a> for the most up-to-date information.
+    </div>
+
+    <script>
+        /**
+         * @typedef {Object} Quota
+         * @property {string|number} possessionLimit
+         * @property {string} [sizeRestriction]
+         * @property {string} [season]
+         * @property {string} [notes]
+         */
+
+        /**
+         * @typedef {Object} Fish
+         * @property {string} id
+         * @property {string} commonName
+         * @property {string} [scientificName]
+         * @property {string} [chineseName]
+         * @property {string} imageUrl
+         * @property {Quota} quota
+         * @property {string[]} tips
+         * @property {string} [conservation]
+         * @property {string} [masterAnglerLength]
+         */
+
+        /** @type {Fish[]} */
+        const fishData = [
+            {
+                id: 'arctic-char',
+                commonName: 'Arctic Char',
+                scientificName: 'Salvelinus alpinus',
+                chineseName: '北极红点鲑',
+                imageUrl: 'images/arctic_char.png',
+                quota: {
+                    possessionLimit: 8,
+                    sizeRestriction: 'None may exceed 40 cm',
+                    season: 'Year-round',
+                    notes: 'Except in stocked trout waters'
+                },
+                tips: [
+                    'Fly fishing',
+                    'Stream fishing',
+                    'Cold water habitats'
+                ],
+                masterAnglerLength: '51 cm (20 in)'
+            },
+            {
+                id: 'arctic-grayling',
+                commonName: 'Arctic Grayling',
+                scientificName: 'Thymallus arcticus',
+                chineseName: '北极茴鱼',
+                imageUrl: 'images/arctic_grayling.png',
+                quota: {
+                    possessionLimit: 3,
+                    sizeRestriction: 'None may exceed 40 cm',
+                    season: 'Year-round',
+                    notes: 'Cold water species'
+                },
+                tips: [
+                    'Dry flies',
+                    'Nymph fishing',
+                    'Clear streams'
+                ],
+                masterAnglerLength: '46 cm (18 in)'
+            },
+            {
+                id: 'bigmouth-buffalo',
+                commonName: 'Bigmouth Buffalo',
+                scientificName: 'Ictiobus cyprinellus',
+                chineseName: '大口牛鱼',
+                imageUrl: 'images/bigmouth_buffalo.png',
+                quota: {
+                    possessionLimit: 0,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Catch-and-release only'
+                },
+                tips: [
+                    'Bottom fishing',
+                    'Cut bait',
+                    'Deep water'
+                ],
+                conservation: 'Protected species'
+            },
+            {
+                id: 'rainbow-trout',
+                commonName: 'Rainbow Trout',
+                scientificName: 'Oncorhynchus mykiss',
+                chineseName: '虹鳟',
+                imageUrl: 'images/rainbow_trout.png',
+                quota: {
+                    possessionLimit: 3,
+                    sizeRestriction: 'Only one may exceed 45 cm',
+                    season: 'Year-round in many waters',
+                    notes: 'Special waters may differ'
+                },
+                tips: [
+                    'Small spinners and spoons',
+                    'Natural baits in slower pools',
+                    'Fly fishing with nymphs'
+                ],
+                masterAnglerLength: '51 cm (20 in)'
+            },
+            {
+                id: 'freshwater-drum',
+                commonName: 'Freshwater Drum',
+                scientificName: 'Aplodinotus grunniens',
+                chineseName: '淡水鼓鱼',
+                imageUrl: 'images/freshwater_drum.png',
+                quota: {
+                    possessionLimit: 10,
+                    sizeRestriction: 'None may exceed 60 cm',
+                    season: 'Year-round',
+                    notes: 'Also known as sheepshead'
+                },
+                tips: [
+                    'Minnows',
+                    'Nightcrawlers',
+                    'Bottom fishing'
+                ],
+                masterAnglerLength: '61 cm (24 in)'
+            },
+            {
+                id: 'goldeye',
+                commonName: 'Goldeye',
+                scientificName: 'Hiodon alosoides',
+                chineseName: '金眼鱼',
+                imageUrl: 'images/goldeye.png',
+                quota: {
+                    possessionLimit: 10,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Either Goldeye or Mooneye'
+                },
+                tips: [
+                    'Minnows',
+                    'Small spinners',
+                    'River fishing'
+                ],
+                masterAnglerLength: '35.5 cm (14 in)'
+            },
+            {
+                id: 'mooneye',
+                commonName: 'Mooneye',
+                scientificName: 'Hiodon tergisus',
+                chineseName: '月眼鱼',
+                imageUrl: 'images/mooneye.png',
+                quota: {
+                    possessionLimit: 10,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Either Goldeye or Mooneye'
+                },
+                tips: [
+                    'Minnows',
+                    'Small spinners',
+                    'River fishing'
+                ],
+                masterAnglerLength: '35.5 cm (14 in)'
+            },
+            {
+                id: 'lake-sturgeon',
+                commonName: 'Lake Sturgeon',
+                scientificName: 'Acipenser fulvescens',
+                chineseName: '湖鲟',
+                imageUrl: 'images/lake_sturgeon.png',
+                quota: {
+                    possessionLimit: 0,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Highly protected species'
+                },
+                tips: [
+                    'Large baits',
+                    'Deep water',
+                    'Strong tackle'
+                ],
+                conservation: 'Endangered species - catch-and-release only',
+                masterAnglerLength: '109 cm (43 in)'
+            },
+            {
+                id: 'lake-whitefish',
+                commonName: 'Lake Whitefish',
+                scientificName: 'Coregonus clupeaformis',
+                chineseName: '湖白鲑',
+                imageUrl: 'images/lake_whitefish.png',
+                quota: {
+                    possessionLimit: 10,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Commercial species'
+                },
+                tips: [
+                    'Bottom fishing',
+                    'Worms',
+                    'Deep water'
+                ],
+                masterAnglerLength: '56 cm (22 in)'
+            },
+            {
+                id: 'black-crappie',
+                commonName: 'Black Crappie',
+                scientificName: 'Pomoxis nigromaculatus',
+                chineseName: '黑鲈',
+                imageUrl: 'images/black_crappie.png',
+                quota: {
+                    possessionLimit: 6,
+                    sizeRestriction: 'None may exceed 35 cm',
+                    season: 'Year-round',
+                    notes: 'Popular panfish'
+                },
+                tips: [
+                    'Minnows',
+                    'Small jigs',
+                    'Brush piles'
+                ],
+                masterAnglerLength: '30.5 cm (12 in)'
+            },
+            {
+                id: 'brook-trout',
+                commonName: 'Brook Trout',
+                scientificName: 'Salvelinus fontinalis',
+                chineseName: '溪鳟',
+                imageUrl: 'images/brook_trout.png',
+                quota: {
+                    possessionLimit: 1,
+                    sizeRestriction: 'None may exceed 45 cm',
+                    season: 'Year-round',
+                    notes: 'Except in stocked trout waters'
+                },
+                tips: [
+                    'Fly fishing',
+                    'Worms',
+                    'Small spinners'
+                ],
+                masterAnglerLength: '51 cm (20 in)'
+            },
+            {
+                id: 'brown-bullhead',
+                commonName: 'Brown Bullhead',
+                scientificName: 'Ameiurus nebulosus',
+                chineseName: '褐牛头鱼',
+                imageUrl: 'images/brown_bullhead.png',
+                quota: {
+                    possessionLimit: 25,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Common catfish species'
+                },
+                tips: [
+                    'Worms',
+                    'Cut bait',
+                    'Liver'
+                ],
+                masterAnglerLength: '30.5 cm (12 in)'
+            },
+            {
+                id: 'burbot',
+                commonName: 'Burbot',
+                scientificName: 'Lota lota',
+                chineseName: '江鳕',
+                imageUrl: 'images/burbot.png',
+                quota: {
+                    possessionLimit: 6,
+                    sizeRestriction: 'None may exceed 70 cm',
+                    season: 'Winter',
+                    notes: 'Cold water species'
+                },
+                tips: [
+                    'Ice fishing',
+                    'Minnows',
+                    'Night fishing'
+                ],
+                masterAnglerLength: '76 cm (30 in)'
+            },
+            {
+                id: 'muskellunge',
+                commonName: 'Muskellunge',
+                scientificName: 'Esox masquinongy',
+                chineseName: '麝香狗鱼',
+                imageUrl: 'images/muskellunge.png',
+                quota: {
+                    possessionLimit: 0,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Catch-and-release only'
+                },
+                tips: [
+                    'Large lures',
+                    'Topwater baits',
+                    'Weeds and structure'
+                ],
+                conservation: 'Rare and protected',
+                masterAnglerLength: '79 cm (31 in)'
+            },
+            {
+                id: 'rock-bass',
+                commonName: 'Rock Bass',
+                scientificName: 'Ambloplites rupestris',
+                chineseName: '岩鲈',
+                imageUrl: 'images/rock_bass.png',
+                quota: {
+                    possessionLimit: 6,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Rocky habitat'
+                },
+                tips: [
+                    'Small jigs',
+                    'Worms',
+                    'Rocky bottoms'
+                ],
+                masterAnglerLength: '25.5 cm (10 in)'
+            },
+            {
+                id: 'smallmouth-bass',
+                commonName: 'Smallmouth Bass',
+                scientificName: 'Micropterus dolomieu',
+                chineseName: '小口黑鲈',
+                imageUrl: 'images/smallmouth_bass.png',
+                quota: {
+                    possessionLimit: 4,
+                    sizeRestriction: 'None may exceed 45 cm',
+                    season: 'Year-round',
+                    notes: 'River and stream species'
+                },
+                tips: [
+                    'Crawfish imitations',
+                    'Tube baits',
+                    'Rocky structure'
+                ],
+                masterAnglerLength: '46 cm (18 in)'
+            },
+            {
+                id: 'white-bass',
+                commonName: 'White Bass',
+                scientificName: 'Morone chrysops',
+                chineseName: '白鲈',
+                imageUrl: 'images/white_bass.png',
+                quota: {
+                    possessionLimit: 10,
+                    sizeRestriction: '',
+                    season: 'Year-round',
+                    notes: 'Schooling fish'
+                },
+                tips: [
+                    'Topwater lures',
+                    'Small spinners',
+                    'Current breaks'
+                ],
+                masterAnglerLength: '38 cm (15 in)'
+            },
+            {
+                id: 'catfish',
+                commonName: 'Channel Catfish',
+                scientificName: 'Ictalurus punctatus',
+                chineseName: '渠鲶',
+                imageUrl: 'images/channel_catfish.png',
+                quota: {
+                    possessionLimit: 4,
+                    sizeRestriction: 'None may exceed 60 cm',
+                    season: 'Year-round',
+                    notes: 'No closed season in most states'
+                },
+                tips: [
+                    'Cut bait or stink baits',
+                    'Fish at night',
+                    'Bottom rigs with heavy weights'
+                ],
+                conservation: 'Popular for food fishing',
+                masterAnglerLength: '86.5 cm (34 in)'
+            },
+            {
+                id: 'lake-trout',
+                commonName: 'Lake Trout',
+                scientificName: 'Salvelinus namaycush',
+                chineseName: '湖鳟',
+                imageUrl: 'images/lake_trout.png',
+                quota: {
+                    possessionLimit: 1,
+                    sizeRestriction: 'None may exceed 65 cm',
+                    season: 'Year-round',
+                    notes: 'Deep water fishing'
+                },
+                tips: [
+                    'Deep water trolling',
+                    'Minnow baits',
+                    'Cold water periods'
+                ],
+                conservation: 'Slow growing species',
+                masterAnglerLength: '89 cm (35 in)'
+            },
+            {
+                id: 'common-carp',
+                commonName: 'Common Carp',
+                scientificName: 'Cyprinus carpio',
+                chineseName: '鲤鱼',
+                imageUrl: 'images/common_carp.png',
+                quota: {
+                    possessionLimit: 'No limit',
+                    sizeRestriction: 'No restriction',
+                    season: 'Year-round',
+                    notes: 'Invasive species'
+                },
+                tips: [
+                    'Boilies',
+                    'Corn',
+                    'Bottom fishing'
+                ],
+                masterAnglerLength: '76 cm (30 in)'
+            },
+            {
+                id: 'sucker',
+                commonName: 'Sucker',
+                scientificName: 'Catostomus spp.',
+                chineseName: '吸盘鱼',
+                imageUrl: 'images/sucker.png',
+                quota: {
+                    possessionLimit: 'No limit',
+                    sizeRestriction: 'No restriction',
+                    season: 'Year-round',
+                    notes: 'Various sucker species'
+                },
+                tips: [
+                    'Worms',
+                    'Insects',
+                    'Current edges'
+                ],
+                masterAnglerLength: '46 cm (18 in)'
+            },
+            {
+                id: 'sunfish',
+                commonName: 'Sunfish',
+                scientificName: 'Lepomis spp.',
+                chineseName: '太阳鱼',
+                imageUrl: 'images/sunfish.png',
+                quota: {
+                    possessionLimit: 'No limit',
+                    sizeRestriction: 'No restriction',
+                    season: 'Year-round',
+                    notes: 'Various sunfish species'
+                },
+                tips: [
+                    'Worms',
+                    'Insects',
+                    'Shallow water'
+                ],
+                masterAnglerLength: '18 cm (7 in)'
+            },
+            {
+                id: 'tiger-trout',
+                commonName: 'Tiger Trout',
+                scientificName: 'Salmo trutta × Salvelinus fontinalis',
+                chineseName: '虎鳟',
+                imageUrl: 'images/tiger_trout.png',
+                quota: {
+                    possessionLimit: 'No limit',
+                    sizeRestriction: 'No restriction',
+                    season: 'Year-round',
+                    notes: 'Hybrid trout species'
+                },
+                tips: [
+                    'Fly fishing',
+                    'Streamers',
+                    'Cold water'
+                ],
+                masterAnglerLength: '51 cm (20 in)'
+            },
+            {
+                id: 'tullibee',
+                commonName: 'Tullibee (Cisco)',
+                scientificName: 'Coregonus artedi',
+                chineseName: '湖白鲑',
+                imageUrl: 'images/tullibee.png',
+                quota: {
+                    possessionLimit: 'No limit',
+                    sizeRestriction: 'No restriction',
+                    season: 'Year-round',
+                    notes: 'Deep water species'
+                },
+                tips: [
+                    'Trolling',
+                    'Deep water',
+                    'Small lures'
+                ],
+                masterAnglerLength: '40.5 cm (16 in)'
+            }
+        ];
+
+        let favorites = JSON.parse(localStorage.getItem('fishFavorites')) || [];
+
+        /**
+         * Renders the list of fish cards
+         * @param {Fish[]} fishList
+         */
+        function renderFishList(fishList) {
+            const container = document.getElementById('fish-cards-container');
+            container.innerHTML = '';
+            fishList.forEach(fish => {
+                container.appendChild(renderCard(fish));
+            });
+        }
+
+        /**
+         * Renders a single fish card
+         * @param {Fish} fish
+         * @returns {HTMLElement}
+         */
+        function renderCard(fish) {
+            const article = document.createElement('article');
+            article.className = 'fish-card';
+            article.setAttribute('data-id', fish.id);
+
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'fish-card__image-container';
+
+            const img = document.createElement('img');
+            img.className = 'fish-card__image';
+            img.src = fish.imageUrl;
+            img.alt = `Image of ${fish.commonName}`;
+            img.onerror = () => {
+                img.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-image';
+                placeholder.textContent = 'Image not available';
+                imageContainer.appendChild(placeholder);
+            };
+            imageContainer.appendChild(img);
+
+            const content = document.createElement('div');
+            content.className = 'fish-card__content';
+
+            const header = document.createElement('header');
+            header.className = 'fish-card__header';
+
+            const commonName = document.createElement('h2');
+            commonName.className = 'fish-card__common-name';
+            commonName.textContent = fish.commonName;
+
+            const scientificName = document.createElement('p');
+            scientificName.className = 'fish-card__scientific-name';
+            scientificName.textContent = fish.scientificName || '';
+
+            const chineseName = document.createElement('p');
+            chineseName.className = 'fish-card__chinese-name';
+            chineseName.textContent = fish.chineseName || '';
+
+            header.appendChild(commonName);
+            if (fish.scientificName) header.appendChild(scientificName);
+            if (fish.chineseName) header.appendChild(chineseName);
+
+            const quotaBadge = document.createElement('div');
+            quotaBadge.className = 'fish-card__quota-badge';
+
+            const quotaSummary = document.createElement('div');
+            quotaSummary.className = 'fish-card__quota-summary';
+            const limitText = typeof fish.quota.possessionLimit === 'number' ? fish.quota.possessionLimit : fish.quota.possessionLimit;
+            quotaSummary.textContent = `Possession: ${limitText}${fish.quota.sizeRestriction ? ` • ${fish.quota.sizeRestriction}` : ''}`;
+
+            const quotaDetails = document.createElement('div');
+            quotaDetails.className = 'fish-card__quota-details';
+            quotaDetails.innerHTML = `
+                <p><strong>Season:</strong> ${fish.quota.season || 'N/A'}</p>
+                ${fish.quota.notes ? `<p><strong>Notes:</strong> ${fish.quota.notes}</p>` : ''}
+                ${fish.masterAnglerLength ? `<p><strong>Master Angler Length:</strong> ${fish.masterAnglerLength}</p>` : ''}
+            `;
+
+            quotaBadge.appendChild(quotaSummary);
+            quotaBadge.appendChild(quotaDetails);
+
+            const tipsList = document.createElement('ul');
+            tipsList.className = 'fish-card__tips';
+            fish.tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.className = 'fish-card__tip';
+                li.textContent = tip;
+                tipsList.appendChild(li);
+            });
+
+            if (fish.conservation) {
+                const conservation = document.createElement('div');
+                conservation.className = 'fish-card__conservation';
+                conservation.textContent = fish.conservation;
+                content.appendChild(conservation);
+            }
+
+            const actions = document.createElement('div');
+            actions.className = 'fish-card__actions';
+
+            const favoriteBtn = document.createElement('button');
+            favoriteBtn.className = 'fish-card__favorite';
+            favoriteBtn.setAttribute('aria-label', 'Toggle favorite');
+            favoriteBtn.textContent = '☆';
+            if (favorites.includes(fish.id)) {
+                favoriteBtn.classList.add('fish-card__favorite--active');
+                favoriteBtn.textContent = '★';
+            }
+            favoriteBtn.addEventListener('click', () => toggleFavorite(fish.id, favoriteBtn));
+
+            const detailsBtn = document.createElement('button');
+            detailsBtn.className = 'fish-card__details-toggle';
+            detailsBtn.textContent = 'Show Details';
+            detailsBtn.setAttribute('aria-expanded', 'false');
+            detailsBtn.addEventListener('click', () => toggleDetails(quotaDetails, detailsBtn));
+
+            actions.appendChild(favoriteBtn);
+            actions.appendChild(detailsBtn);
+
+            content.appendChild(header);
+            content.appendChild(quotaBadge);
+            content.appendChild(tipsList);
+            content.appendChild(actions);
+
+            article.appendChild(imageContainer);
+            article.appendChild(content);
+
+            return article;
+        }
+
+        /**
+         * Toggles favorite status
+         * @param {string} id
+         * @param {HTMLElement} btn
+         */
+        function toggleFavorite(id, btn) {
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                btn.classList.remove('fish-card__favorite--active');
+                btn.textContent = '☆';
+            } else {
+                favorites.push(id);
+                btn.classList.add('fish-card__favorite--active');
+                btn.textContent = '★';
+            }
+            localStorage.setItem('fishFavorites', JSON.stringify(favorites));
+        }
+
+        /**
+         * Toggles quota details visibility
+         * @param {HTMLElement} details
+         * @param {HTMLElement} btn
+         */
+        function toggleDetails(details, btn) {
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            if (isExpanded) {
+                details.classList.remove('fish-card__quota-details--expanded');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.textContent = 'Show Details';
+            } else {
+                details.classList.add('fish-card__quota-details--expanded');
+                btn.setAttribute('aria-expanded', 'true');
+                btn.textContent = 'Hide Details';
+            }
+        }
+
+        /**
+         * Filters fish list based on search query
+         * @param {string} query
+         */
+        function filterFish(query) {
+            const filtered = fishData.filter(fish =>
+                fish.commonName.toLowerCase().includes(query.toLowerCase()) ||
+                (fish.scientificName && fish.scientificName.toLowerCase().includes(query.toLowerCase())) ||
+                (fish.chineseName && fish.chineseName.toLowerCase().includes(query.toLowerCase()))
+            );
+            renderFishList(filtered);
+        }
+
+        /**
+         * Attaches event listeners
+         */
+        function attachEvents() {
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('input', (e) => filterFish(e.target.value));
+        }
+
+        // Initialize
+        renderFishList(fishData);
+        attachEvents();
+    </script>
+</body>
+</html>
