@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manitoba Fishing Tips</title>
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "urrseiyu43");
+    </script>
     <!--
     Design Notes:
     - Assumptions: Comprehensive Manitoba fishing regulations data included. Master Angler lengths are for recognition programs. Always verify current local regulations. Images are placeholders; replace with actual fish images.
@@ -249,12 +256,42 @@
             font-size: 1rem;
             color: var(--secondary-color);
         }
+        /* Site navigation and footer styles */
+        .site-nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 0.5rem 0 1rem 0;
+        }
+        .site-nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .site-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .site-footer {
+            margin-top: 2rem;
+            padding: 1rem 0;
+            background: transparent;
+            color: var(--secondary-color);
+            text-align: center;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Manitoba Fishing Tips</h1>
-        <p>For official regulations, refer to the <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></p>
+        <div class="site-brand">
+            <h1><a href="index.html">Manitoba Fishing Tips</a></h1>
+            <p>For official regulations, refer to the <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></p>
+        </div>
+        <nav class="site-nav" aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="AnglerMap.html">Angler Map</a>
+        </nav>
         <div class="search-container">
             <input type="text" id="search" placeholder="Search Manitoba fish species..." aria-label="Search fish cards">
         </div>
@@ -265,6 +302,12 @@
     <div class="disclaimer">
         Always verify current Manitoba fishing regulations. Quota information is for demonstration purposes only. Consult the official <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a> for the most up-to-date information.
     </div>
+
+    <footer class="site-footer">
+        <div>
+            <small>© 2025 <a href="https://chefbig.ca" target="_blank" rel="noopener noreferrer">ChefBig</a> — Manitoba Fishing Tips. Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
+        </div>
+    </footer>
 
     <script>
         /**

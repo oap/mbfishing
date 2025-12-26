@@ -4,6 +4,13 @@
   <title>Manitoba Angler Map</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "urrseiyu43");
+  </script>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -30,9 +37,23 @@
       padding: 5px;
       width: 200px;
     }
+    /* Site nav/footer styles for consistency */
+    .site-nav { position: absolute; left: 200px; top: 12px; z-index: 1100; display:flex; gap:12px; }
+    .site-nav a { color: #2c3e50; text-decoration: none; background: white; padding:6px 8px; border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+    .site-footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1200; text-align:center; padding:8px; background: rgba(255,255,255,0.9); font-size:0.9rem; }
   </style>
 </head>
 <body>
+
+<header style="position:relative; z-index:1100; padding:8px 16px; background:transparent;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div class="site-brand"><a href="index.html" style="font-weight:700;text-decoration:none;color:#2c3e50;">Manitoba Fishing Tips</a></div>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="AnglerMap.html">Angler Map</a>
+    </nav>
+  </div>
+</header>
 
 <div id="ui-controls">
   <label for="species"><b>Choose Target Species:</b></label><br><br>
@@ -179,6 +200,12 @@
   legend.addTo(map);
 
 </script>
+
+<footer class="site-footer">
+  <div>
+    <small>© 2025 Your Name — Manitoba Fishing Tips. Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
+  </div>
+</footer>
 
 </body>
 </html>
