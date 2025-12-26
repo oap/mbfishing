@@ -1,0 +1,39 @@
+SPECIES
+Arctic Charr
+Arctic Grayling
+Bigmouth Buffalo
+Black Bullhead
+Black Crappie
+Bluegill
+Brook Trout
+Brown Bullhead
+Brown Trout
+Burbot
+Channel Catfish
+Cisco
+Common Carp
+Cutthroat Trout
+Freshwater Drum
+Goldeye
+Kokanee
+Lake Sturgeon
+Lake Trout
+Lake Whitefish
+Largemouth Bass
+Mooneye
+Muskellunge
+Northern Pike
+Pumpkinseed
+Quillback
+Raibow Trout
+Rainbow Trout
+Rock Bass
+Sauger
+Smallmouth Bass
+Splake
+Tiger Trout
+Walleye
+White Bass
+White Crappie
+White Sucker
+Yellow Perch

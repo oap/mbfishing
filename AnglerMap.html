@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manitoba Angler Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+    
+    /* Style for the floating filter box */
+    #ui-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1000; /* Higher than map */
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    select {
+      font-size: 16px;
+      padding: 5px;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="ui-controls">
+  <label for="species"><b>Choose Target Species:</b></label><br><br>
+  <select id="species">
+    <option value="1=1">Show All Lakes</option>
+    <option value="SPECIES LIKE '%Walleye%'">Walleye</option>
+    <option value="SPECIES LIKE '%Northern Pike%'">Northern Pike</option>
+    <option value="SPECIES LIKE '%Yellow Perch%'">Yellow Perch</option>
+    <option value="SPECIES LIKE '%Smallmouth Bass%'">Smallmouth Bass</option>
+    <option value="SPECIES LIKE '%Lake Whitefish%'">Lake Whitefish</option>
+    <option value="SPECIES LIKE '%Goldeye%'">Goldeye (Red River Area)</option>
+    <option value="SPECIES LIKE '%Sauger%'">Sauger</option>
+    <option value="SPECIES LIKE '%Burbot%'">Burbot (Mariah)</option>
+    <option value="SPECIES LIKE '%Freshwater Drum%'">Freshwater Drum</option>
+    <option value="SPECIES LIKE '%Trout%'">Trout (Lake, Brook, etc.)</option>
+    <option value="SPECIES LIKE '%Bullhead%'">Brown Bullhead</option>
+    <option value="SPECIES LIKE '%Crappie%'">Black Crappie</option>
+    <option value="SPECIES LIKE '%Bluegill%'">Bluegill</option>
+  </select>
+</div>
+
+<div id="map"></div>
+<script>
+    // Manitoba Waterbody Stocking Records Feature Service
+    // const waterbodyUrl = "https://services.arcgis.com/mMUesHYPkXjaFGfS/arcgis/rest/services/Manitoba_Waterbody_Stocking_Records/FeatureServer/0";
+
+    // Manitoba Waterbody Data Feature Service
+    const waterbodyUrl = "https://services.arcgis.com/mMUesHYPkXjaFGfS/arcgis/rest/services/Manitoba_Waterbody_Data/FeatureServer/0";
+
+</script>
+
+<script>
+  // 1. Initialize Map
+  const map = L.map('map').setView([51.5, -97], 6); // Centered to show the split
+
+  // 2. Add Base Map
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // --- LOGIC: Color coding with Special Areas ---
+  function getDivisionColor(props) {
+    const div = (props.FISHING_DIVISION || '').toUpperCase();
+    // The field name for Special Area is usually 'SPECIAL_AREA' or 'Special_Area'
+    // We check both just to be safe with the API data
+    const special = (props.SPECIAL_AREA || props.Special_Area || '').toUpperCase();
+
+    // 1. Handle SOUTHERN DIVISION Hierarchy
+    if (div.includes('SOUTH')) {
+      if (special.includes('AREA A')) return '#8e44ad'; // Purple (Area A)
+      if (special.includes('AREA B')) return '#0500d3'; // Dark Orange (Area B)
+      return '#c0392b'; // Standard Red (Southern General)
+    }
+
+    // 2. Handle NORTHERN DIVISIONS
+    if (div.includes('NORTH CENTRAL')) return '#2980b9'; // Blue
+    if (div.includes('NORTHEAST'))     return '#16a085'; // Teal
+    if (div.includes('NORTHWEST'))     return '#27ae60'; // Green
+
+    return '#95a5a6'; // Grey (Unknown)
+  }
+
+  // 3. Define the Manitoba Data Layer
+  // const waterbodyUrl = "https://geoportal.gov.mb.ca/server/rest/services/Public/Manitoba_Waterbody_Data/FeatureServer/0";
+
+  const fishingLayer = L.esri.featureLayer({
+    url: waterbodyUrl,
+    where: "1=1",
+    
+    pointToLayer: function (geojson, latlng) {
+      // Pass the *whole* properties object to our color function
+      const color = getDivisionColor(geojson.properties);
+
+      return L.circleMarker(latlng, {
+        color: '#2c3e50',
+        fillColor: color,
+        fillOpacity: 0.8,
+        radius: 6,
+        weight: 1
+      });
+    }
+  }).addTo(map);
+
+  // 4. Add Popups (Now showing Special Area info)
+  fishingLayer.bindPopup(function (layer) {
+    const props = layer.feature.properties;
+    const specialArea = props.SPECIAL_AREA || props.Special_Area || '';
+    
+    // Create a warning note if it's a special area
+    let areaNote = '';
+    if (specialArea) {
+      areaNote = `<br><strong style="color:red">⚠️ ${specialArea} Regulations Apply</strong>`;
+    }
+
+    return `
+      <div style="font-size:14px">
+        <b>${props.WATERBODY_NAME}</b><br>
+        <span style="color:gray">${props.FISHING_DIVISION}</span>
+        ${areaNote}
+        <hr style="margin: 5px 0;">
+        Fish: <i>${props.SPECIES || 'Not listed'}</i><br>
+      </div>
+    `;
+  });
+
+  // 4. Connect Dropdown to the Map
+  const speciesSelect = document.getElementById('species');
+
+  speciesSelect.addEventListener('change', function() {
+    // Get the SQL query from the dropdown value
+    const newQuery = speciesSelect.value;
+    
+    // Tell the map layer to update its filter
+    fishingLayer.setWhere(newQuery);
+
+  });
+
+  // 5. Updated Legend
+  const legend = L.control({position: 'bottomright'});
+  legend.onAdd = function (map) {
+      const div = L.DomUtil.create('div', 'info legend');
+      div.style.background = 'white';
+      div.style.padding = '10px';
+      div.style.borderRadius = '5px';
+      div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+      div.style.lineHeight = '1.5em';
+
+      div.innerHTML = `
+        <b>Fishing Regulations</b><br>
+        <hr style="margin:5px 0">
+        <b>Southern Division</b><br>
+        <i style="background:#c0392b; width:10px; height:10px; display:inline-block;"></i> General<br>
+        <i style="background:#8e44ad; width:10px; height:10px; display:inline-block;"></i> Area A<br>
+        <i style="background:#0500d3; width:10px; height:10px; display:inline-block;"></i> Area B<br>
+        <hr style="margin:5px 0">
+        <b>Northern Divisions</b><br>
+        <i style="background:#2980b9; width:10px; height:10px; display:inline-block;"></i> North Central<br>
+        <i style="background:#27ae60; width:10px; height:10px; display:inline-block;"></i> Northwest<br>
+        <i style="background:#16a085; width:10px; height:10px; display:inline-block;"></i> Northeast<br>
+      `;
+      return div;
+  };
+  legend.addTo(map);
+
+</script>
+
+</body>
+</html>
