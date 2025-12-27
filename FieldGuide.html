@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manitoba Angler's Field Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* Stone 100 */
+        }
+        
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for the list */
+        .fish-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .fish-list::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .fish-list::-webkit-scrollbar-thumb {
+            background: #a8a29e; 
+            border-radius: 4px;
+        }
+        .fish-list::-webkit-scrollbar-thumb:hover {
+            background: #78716c; 
+        }
+
+        .card-enter {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .active-fish {
+            background-color: #e7e5e4; /* Stone 200 */
+            border-left: 4px solid #0f766e; /* Teal 700 */
+        }
+    </style>
+    <!-- Chosen Palette: Manitoba Nature (Stone, Teal, Deep Blue, Amber) -->
+    <!-- Application Structure Plan: Dashboard Layout. 
+         1. Hero Section: Sets context.
+         2. Analytical Dashboard: Two charts (Family Distribution & Size Comparison) to give a high-level overview of biodiversity.
+         3. The Guide (Split View): Left sidebar for filtering/selection (Search/Sort), Right panel for deep-dive content (Details).
+         Rationale: The list of 30+ species is too long for a linear read. A 'Master-Detail' interface allows users to compare and explore at their own pace. -->
+    <!-- Visualization & Content Choices:
+         - Size Comparison Chart: Horizontal Bar Chart. Goal: Compare. Shows relative scale of fish to help users understand what they might catch.
+         - Family Distribution: Doughnut Chart. Goal: Inform. Shows the dominance of certain families (like Cyprinidae or Salmonidae) in MB waters.
+         - Detail View: Text-based cards with clear headers (ID, Habitat, Angling) + Iconography for quick scanning. No SVG/Images used, relying on typography and layout.
+         - Interaction: Javascript filters for the list, click handlers for the detail view, and chart updates. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="text-stone-800 antialiased">
+
+    <!-- Navbar / Hero -->
+    <header class="bg-teal-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0 text-center md:text-left">
+                    <h1 class="text-3xl md:text-4xl font-bold text-amber-50">Manitoba Angler's Field Guide</h1>
+                    <p class="text-teal-200 mt-2 text-sm md:text-base max-w-xl">
+                        A comprehensive interactive database of the 36+ key fish species found in Manitoba's lakes and rivers. 
+                        Explore identification traits, habitats, and expert angling tactics.
+                    </p>
+                </div>
+                <div class="text-right hidden md:block">
+                    <div class="text-amber-400 font-bold text-lg">100,000+ Lakes</div>
+                    <div class="text-teal-300 text-sm">One Guide.</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 space-y-8">
+
+        <!-- Intro Section for Analytics -->
+        <section>
+            <h2 class="text-2xl font-bold text-teal-900 mb-2">Biodiversity Overview</h2>
+            <p class="text-stone-600 mb-6 max-w-3xl">
+                Manitoba is home to a diverse range of freshwater species, from the ancient Lake Sturgeon to the popular Walleye. 
+                Use the visualizations below to understand the biological landscape and size potential of these species before diving into specific details.
+            </p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Chart 1: Family Distribution -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-stone-800">Species Distribution by Family</h3>
+                        <p class="text-xs text-stone-500">Breakdown of the 36 tracked species by biological family.</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center bg-stone-50 rounded-lg p-2">
+                        <div class="chart-container">
+                            <canvas id="familyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Size Comparison -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-stone-800">Trophy Potential (Length)</h3>
+                        <p class="text-xs text-stone-500">Comparison of average maximum lengths (cm) for popular game fish.</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center bg-stone-50 rounded-lg p-2">
+                        <div class="chart-container">
+                            <canvas id="sizeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Interface: Fish Explorer -->
+        <section id="explorer" class="bg-white rounded-xl shadow-lg border border-stone-200 overflow-hidden">
+            <div class="flex flex-col lg:flex-row h-[85vh] lg:h-[800px]">
+                
+                <!-- Sidebar: List & Filters -->
+                <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-stone-200 flex flex-col bg-stone-50">
+                    <!-- Search Header -->
+                    <div class="p-4 border-b border-stone-200 bg-white z-10">
+                        <h3 class="text-teal-900 font-bold mb-3">Find a Species</h3>
+                        <input type="text" id="searchInput" placeholder="Search (e.g., Walleye, Trout)..." 
+                               class="w-full px-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm mb-3">
+                        
+                        <div class="flex gap-2">
+                            <select id="familyFilter" class="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm bg-white focus:outline-none focus:border-teal-500">
+                                <option value="All">All Families</option>
+                                <option value="Perch">Perch/Walleye</option>
+                                <option value="Pike">Pike/Musky</option>
+                                <option value="Trout">Trout/Salmon</option>
+                                <option value="Bass">Bass/Sunfish</option>
+                                <option value="Catfish">Catfish</option>
+                                <option value="Other">Sturgeon/Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable List -->
+                    <div id="fishListContainer" class="fish-list overflow-y-auto flex-grow p-2 space-y-1">
+                        <!-- List items injected by JS -->
+                    </div>
+                    
+                    <div class="p-3 bg-stone-100 text-center text-xs text-stone-500 border-t border-stone-200">
+                        Showing <span id="countDisplay">0</span> species
+                    </div>
+                </div>
+
+                <!-- Main Content: Details Panel -->
+                <div class="w-full lg:w-2/3 overflow-y-auto p-6 md:p-8 relative bg-white" id="detailPanel">
+                    <!-- Dynamic Content Injected Here -->
+                    <div class="h-full flex flex-col items-center justify-center text-stone-400">
+                        <div class="text-6xl mb-4">🐟</div>
+                        <p class="text-lg">Select a fish from the list to view details.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-stone-400 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; 2025 Manitoba Angler's Field Guide <a href="https://chefbig.ca">chefbig.ca</a>. Research based on Manitoba fisheries data.</p>
+            <p class="mt-2">Always check current provincial angling regulations before fishing.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Data Layer ---
+        const fishDatabase = [
+            {
+                id: 1,
+                name: "Walleye",
+                altName: "Pickerel",
+                family: "Perch",
+                sciName: "Sander vitreus",
+                trophySize: 70, // cm
+                desc: "Manitoba's provincial fish and most sought-after catch. They are known for their golden-olive color and the distinct white tip on the lower lobe of the tail.",
+                habitat: "Large, turbid lakes and rivers. They prefer low-light conditions and structure like reefs or drop-offs.",
+                angling: "Jigging with minnows or leeches is the gold standard. Trolling crankbaits or spinner rigs (bottom bouncers) works well in summer. Ice fishing is extremely popular.",
+                loc: "Lake Winnipeg (famous 'Greenbacks'), Red River, Lake Manitoba, remote fly-in lakes.",
+                edibility: "Excellent. Highly prized for white, flaky flesh."
+            },
+            {
+                id: 2,
+                name: "Northern Pike",
+                altName: "Jackfish, Water Wolf",
+                family: "Pike",
+                sciName: "Esox lucius",
+                trophySize: 105,
+                desc: "Aggressive predator with a long, torpedo-shaped body, duck-bill snout full of teeth, and bean-shaped yellow spots on a dark green background.",
+                habitat: "Almost everywhere. Shallow, weedy bays in spring/early summer; deeper weed lines and drop-offs in summer.",
+                angling: "Use wire leaders! Spoons (Five of Diamonds), large spinners, and jerkbaits. Fly fishing with large streamers is thrilling.",
+                loc: "Widespread across the province.",
+                edibility: "Good, but bony (Y-bones require specific filleting technique)."
+            },
+            {
+                id: 3,
+                name: "Lake Sturgeon",
+                altName: "Living Fossil",
+                family: "Other",
+                sciName: "Acipenser fulvescens",
+                trophySize: 130,
+                desc: "Ancient, bottom-dwelling giant. Covered in bony plates (scutes) instead of scales. Shark-like tail and barbels near mouth.",
+                habitat: "Fast-flowing rivers and lake bottoms. Often found in deep holes or near currents.",
+                angling: "Heavy tackle required. Bottom fishing with nightcrawlers or cut bait. *Strict regulations apply; often catch-and-release only.*",
+                loc: "Winnipeg River, Red River, Nelson River systems.",
+                edibility: "Protected in many areas - Check regulations."
+            },
+            {
+                id: 4,
+                name: "Channel Catfish",
+                altName: "Channel Cat",
+                family: "Catfish",
+                sciName: "Ictalurus punctatus",
+                trophySize: 85,
+                desc: "Manitoba's gentle giant. Deeply forked tail (unlike bullheads), slate-grey body, and long whiskers (barbels).",
+                habitat: "Large rivers with moderate current. The Red River north of Lockport is a world-class trophy fishery.",
+                angling: "Bottom fishing with cut bait (sucker, goldeye), shrimp, or prepared stink baits. Use circle hooks.",
+                loc: "Red River, Assiniboine River, Lake Winnipeg.",
+                edibility: "Good, firm flesh."
+            },
+            {
+                id: 5,
+                name: "Lake Trout",
+                altName: "Laker",
+                family: "Trout",
+                sciName: "Salvelinus namaycush",
+                trophySize: 90,
+                desc: "A char, not a true trout. Dark body with light spots and a deeply forked tail. Requires cold, oxygen-rich water.",
+                habitat: "Deep, cold, clear lakes in the Canadian Shield (Eastern and Northern Manitoba).",
+                angling: "Vertical jigging with white tubes or heavy spoons in deep water. Downrigging in summer.",
+                loc: "Clearwater Lake, Athapapuskow, Nueltin Lake.",
+                edibility: "Excellent, rich oily flesh (good for smoking)."
+            },
+            {
+                id: 6,
+                name: "Smallmouth Bass",
+                altName: "Smallie",
+                family: "Bass",
+                sciName: "Micropterus dolomieu",
+                trophySize: 45,
+                desc: "Bronze/brown color with vertical dark bars. The jaw does not extend past the eye. Pound-for-pound immense fighters.",
+                habitat: "Clear water with rocky structure, shoals, and submerged logs.",
+                angling: "Tube jigs, drop-shots, crankbaits, and topwater poppers in the evening.",
+                loc: "Winnipeg River, Whiteshell Provincial Park, Rocky Lake.",
+                edibility: "Good, but often practiced as Catch & Release sport."
+            },
+            {
+                id: 7,
+                name: "Yellow Perch",
+                altName: "",
+                family: "Perch",
+                sciName: "Perca flavescens",
+                trophySize: 30,
+                desc: "Golden yellow body with 6-8 distinct dark vertical bars. Small but plentiful.",
+                habitat: "Schools in weedy areas, submerged vegetation, and near drop-offs.",
+                angling: "Small jigs tipped with minnows or worms. Very popular winter sport fish.",
+                loc: "Lake Manitoba, Dauphin Lake, Lake of the Prairies, Shoal Lake.",
+                edibility: "Superb. Considered by many as the best tasting fish."
+            },
+            {
+                id: 8,
+                name: "Arctic Grayling",
+                altName: "Sailfish of the North",
+                family: "Trout",
+                sciName: "Thymallus arcticus",
+                trophySize: 40,
+                desc: "Stunning large, colorful dorsal fin and iridescent body spots.",
+                habitat: "Cold, clear northern rivers and lakes. Sensitive to pollution.",
+                angling: "Fly fishing favorite (dry flies, nymphs). Small spinners.",
+                loc: "Northern Manitoba rivers (Wolf,Owl), some stocked lakes in Duck Mountains.",
+                edibility: "Good, delicate."
+            },
+            {
+                id: 9,
+                name: "Brook Trout",
+                altName: "Speckled Trout",
+                family: "Trout",
+                sciName: "Salvelinus fontinalis",
+                trophySize: 50,
+                desc: "Dark green/brown with light worm-like markings on back. Red spots with blue halos. White leading edge on fins.",
+                habitat: "Cold streams and stocked lakes. Needs high oxygen.",
+                angling: "Fly fishing, small spoons, spinners. Quiet approach is key.",
+                loc: "Gods River (World Class), Parkland region stocked lakes.",
+                edibility: "Excellent."
+            },
+            {
+                id: 10,
+                name: "Rainbow Trout",
+                altName: "Bow",
+                family: "Trout",
+                sciName: "Oncorhynchus mykiss",
+                trophySize: 60,
+                desc: "Silver body with a distinct pink/red lateral stripe. Covered in small black spots.",
+                habitat: "Mostly stocked in aeration-managed pothole lakes in the Parkland/Westman regions.",
+                angling: "PowerBait, worms, spinners, flies. Ice fishing is very productive.",
+                loc: "Patterson Lake, Tokaryk Lake, various stocked ponds.",
+                edibility: "Good."
+            },
+            {
+                id: 11,
+                name: "Black Crappie",
+                altName: "Paper Mouth",
+                family: "Bass",
+                sciName: "Pomoxis nigromaculatus",
+                trophySize: 30,
+                desc: "Deep, compressed body with mottled black/green patterns. Paper-thin mouth.",
+                habitat: "Clear water with abundant vegetation/weeds.",
+                angling: "Small jigs under a slip bobber. Minnows. Very light bites.",
+                loc: "Whiteshell lakes, Minnedosa Lake, Lake of the Woods.",
+                edibility: "Excellent."
+            },
+            {
+                id: 12,
+                name: "Goldeye",
+                altName: "Winnipeg Gold",
+                family: "Other",
+                sciName: "Hiodon alosoides",
+                trophySize: 35,
+                desc: "Silver compressed body with a large gold eye. Teeth on tongue.",
+                habitat: "Turbid, silty rivers.",
+                angling: "Fly fishing or light float fishing with worms. Feeds on surface insects.",
+                loc: "Red River, Assiniboine River, Saskatchewan River.",
+                edibility: "Famous as 'Smoked Goldeye'. Soft flesh otherwise."
+            },
+            {
+                id: 13,
+                name: "Sauger",
+                altName: "Sand Pike",
+                family: "Perch",
+                sciName: "Sander canadensis",
+                trophySize: 45,
+                desc: "Looks like a Walleye but smaller, distinct spots on dorsal fin, no white tail tip. Brassier color.",
+                habitat: "Turbid rivers and large shallow lakes.",
+                angling: "Same as Walleye: jigs and minnows. Often caught alongside Walleye.",
+                loc: "Red River, Lake Winnipeg, Assiniboine River.",
+                edibility: "Excellent, same as Walleye."
+            },
+            {
+                id: 14,
+                name: "Muskellunge",
+                altName: "Musky",
+                family: "Pike",
+                sciName: "Esox masquinongy",
+                trophySize: 115,
+                desc: "The 'Fish of 10,000 casts'. Vertical bars on light background (opposite of Pike). Pointed tail lobes.",
+                habitat: "Large clear lakes with rocky structure and cabbage weeds.",
+                angling: "Massive lures (suicks, bucktails, bulldawgs). Heavy rod required.",
+                loc: "Rare in MB. Line Lake, Shoal Lake (border water).",
+                edibility: "Strictly Catch & Release ethos."
+            },
+            {
+                id: 15,
+                name: "Brown Trout",
+                altName: "German Brown",
+                family: "Trout",
+                sciName: "Salmo trutta",
+                trophySize: 60,
+                desc: "Golden brown with dark spots (often with pale halos). Stocky build.",
+                habitat: "Stocked lakes and streams. Tolerates slightly warmer water than Brookies.",
+                angling: "Crankbaits, flies. Known to be wary and harder to catch.",
+                loc: "Parkland stocked lakes (e.g., Patterson).",
+                edibility: "Good."
+            },
+            {
+                id: 16,
+                name: "Burbot",
+                altName: "Mariah, Eelpout",
+                family: "Other",
+                sciName: "Lota lota",
+                trophySize: 75,
+                desc: "Freshwater cod. Snake-like body, single barbel on chin, mottled skin.",
+                habitat: "Deep cold water in summer, spawns under ice in winter.",
+                angling: "Glow jigs with bait on bottom at night. Heavy winter feeder.",
+                loc: "Lake Winnipeg, Cedar Lake, large deep lakes.",
+                edibility: "Excellent (Poor man's lobster). Firm white meat."
+            },
+            {
+                id: 17,
+                name: "Lake Whitefish",
+                altName: "Humpback",
+                family: "Other",
+                sciName: "Coregonus clupeaformis",
+                trophySize: 55,
+                desc: "Silver with small mouth. Adipose fin present.",
+                habitat: "Deep cool waters.",
+                angling: "Small jigs, waxworms, spoons. Often difficult to hook due to small mouth.",
+                loc: "Lake Winnipeg, Clear Lake, Northern lakes.",
+                edibility: "Excellent (Smoked)."
+            },
+            {
+                id: 18,
+                name: "Freshwater Drum",
+                altName: "Sheepshead",
+                family: "Other",
+                sciName: "Aplodinotus grunniens",
+                trophySize: 60,
+                desc: "Silver/white, high arched back. Makes a grunting noise.",
+                habitat: "Shallow turbid water, river bottoms.",
+                angling: "Worms, jigs. Great fighters.",
+                loc: "Red River, Lake Manitoba.",
+                edibility: "Okay, better in cold water."
+            },
+            {
+                id: 19,
+                name: "Arctic Charr",
+                altName: "",
+                family: "Trout",
+                sciName: "Salvelinus alpinus",
+                trophySize: 80,
+                desc: "Streamlined, light spots on dark body (sea run) or bright orange belly (spawning).",
+                habitat: "Far North rivers and coastal waters.",
+                angling: "Spoons, flies.",
+                loc: "Hudson Bay tributaries, Seal River.",
+                edibility: "World class."
+            },
+            {
+                id: 20,
+                name: "Bullhead (Black/Brown)",
+                altName: "Mud Cat",
+                family: "Catfish",
+                sciName: "Ameiurus",
+                trophySize: 30,
+                desc: "Small catfish, square tail (not forked).",
+                habitat: "Muddy bottoms, slow water.",
+                angling: "Worms on bottom.",
+                loc: "Creeks, ponds, Red River tributaries.",
+                edibility: "Good in cold water."
+            },
+            {
+                id: 21,
+                name: "Splake",
+                altName: "Hybrid",
+                family: "Trout",
+                sciName: "Hybrid",
+                trophySize: 60,
+                desc: "Cross between Lake Trout and Brook Trout. Fast growing.",
+                habitat: "Stocked lakes.",
+                angling: "Aggressive feeders. Spoons, jigs.",
+                loc: "Duck Mountains, Whiteshell.",
+                edibility: "Excellent."
+            },
+            {
+                id: 22,
+                name: "Tiger Trout",
+                altName: "Hybrid",
+                family: "Trout",
+                sciName: "Hybrid",
+                trophySize: 55,
+                desc: "Cross between Brook Trout and Brown Trout. Distinct vermiculated 'tiger' stripes.",
+                habitat: "Stocked lakes.",
+                angling: "Aggressive, hit lures hard.",
+                loc: "Twin Lakes, Patterson Lake.",
+                edibility: "Good."
+            },
+            {
+                id: 23,
+                name: "Common Carp",
+                altName: "",
+                family: "Other",
+                sciName: "Cyprinus carpio",
+                trophySize: 85,
+                desc: "Large scales, barbels near mouth, golden/brown color. Invasive but established.",
+                habitat: "Warm, shallow, weedy water.",
+                angling: "Corn, dough balls. Massive fighters.",
+                loc: "Red River, Lake Manitoba marshes.",
+                edibility: "Poor (bony/muddy taste)."
+            },
+            {
+                id: 24,
+                name: "White Bass",
+                altName: "Silver Bass",
+                family: "Bass",
+                sciName: "Morone chrysops",
+                trophySize: 38,
+                desc: "Silver with horizontal dark stripes. Deep body.",
+                habitat: "Large lakes and rivers.",
+                angling: "Aggressive schooling fish. Small jigs, spinners.",
+                loc: "Lake Winnipeg South Basin.",
+                edibility: "Good."
+            },
+            {
+                id: 25,
+                name: "Rock Bass",
+                altName: "Red Eye",
+                family: "Bass",
+                sciName: "Ambloplites rupestris",
+                trophySize: 25,
+                desc: "Red eye, mottled brown body. Looks like a robust sunfish.",
+                habitat: "Rocky areas, docks.",
+                angling: "Small jigs, worms.",
+                loc: "Whiteshell, rocky lakes.",
+                edibility: "Good, small fillets."
+            },
+            {
+                id: 26,
+                name: "Mooneye",
+                altName: "",
+                family: "Other",
+                sciName: "Hiodon tergisus",
+                trophySize: 30,
+                desc: "Looks like Goldeye but with larger iris relative to eye size.",
+                habitat: "Clearer rivers than Goldeye.",
+                angling: "Flies, small spinners.",
+                loc: "Winnipeg River.",
+                edibility: "Smoked."
+            },
+            {
+                id: 27,
+                name: "Bigmouth Buffalo",
+                altName: "",
+                family: "Other",
+                sciName: "Ictiobus cyprinellus",
+                trophySize: 70,
+                desc: "Resembles carp but no barbels. Sucker mouth facing forward.",
+                habitat: "Slow rivers (Red, Assiniboine).",
+                angling: "Difficult to catch on hook/line (plankton feeders).",
+                loc: "Assiniboine River.",
+                edibility: "Bony."
+            },
+            {
+                id: 28,
+                name: "Quillback",
+                altName: "Carpsucker",
+                family: "Other",
+                sciName: "Carpiodes cyprinus",
+                trophySize: 50,
+                desc: "Deep body, long dorsal fin ray (quill). Sucker mouth.",
+                habitat: "Rivers.",
+                angling: "Worms, rarely targeted.",
+                loc: "Red River.",
+                edibility: "Bony."
+            },
+            {
+                id: 29,
+                name: "White Sucker",
+                altName: "Mullet",
+                family: "Other",
+                sciName: "Catostomus commersonii",
+                trophySize: 50,
+                desc: "Cylindrical body, round sucker mouth pointing down.",
+                habitat: "Widespread streams/lakes.",
+                angling: "Worms on bottom.",
+                loc: "Everywhere.",
+                edibility: "Good (canned/ground) but very bony."
+            },
+            {
+                id: 30,
+                name: "Cisco",
+                altName: "Tullibee",
+                family: "Other",
+                sciName: "Coregonus artedi",
+                trophySize: 40,
+                desc: "Silver forage fish.",
+                habitat: "Open water, suspended.",
+                angling: "Small spoons in winter.",
+                loc: "Large lakes.",
+                edibility: "Smoked."
+            },
+            {
+                id: 31,
+                name: "Kokanee",
+                altName: "Landlocked Salmon",
+                family: "Trout",
+                sciName: "Oncorhynchus nerka",
+                trophySize: 45,
+                desc: "Landlocked Sockeye Salmon. Silver, turns red when spawning.",
+                habitat: "Deep clear lakes.",
+                angling: "Downrigging, trolling.",
+                loc: "Very rare, stocked in Singush Lake (check current status).",
+                edibility: "Excellent."
+            },
+            {
+                id: 32,
+                name: "Largemouth Bass",
+                altName: "Bucketmouth",
+                family: "Bass",
+                sciName: "Micropterus salmoides",
+                trophySize: 45,
+                desc: "Green with dark horizontal stripe. Jaw extends past eye.",
+                habitat: "Weedy warm lakes, lily pads.",
+                angling: "Topwater frogs, plastic worms, jigs.",
+                loc: "Limited range: Fort Whyte Alive, some Whiteshell lakes.",
+                edibility: "Good."
+            },
+            {
+                id: 33,
+                name: "Bluegill",
+                altName: "Bream",
+                family: "Bass",
+                sciName: "Lepomis macrochirus",
+                trophySize: 25,
+                desc: "Deep blue/purple opercular flap. Dark spot on dorsal fin.",
+                habitat: "Weedy shallows.",
+                angling: "Small worms, flies.",
+                loc: "Introduced in some Metigoshe/South areas.",
+                edibility: "Excellent panfish."
+            },
+            {
+                id: 34,
+                name: "Pumpkinseed",
+                altName: "Sunfish",
+                family: "Bass",
+                sciName: "Lepomis gibbosus",
+                trophySize: 20,
+                desc: "Colorful, orange/blue wavy lines on face. Red spot on gill flap.",
+                habitat: "Weedy shallows.",
+                angling: "Worms, bobbers.",
+                loc: "Whiteshell, Southern MB.",
+                edibility: "Good."
+            },
+             {
+                id: 35,
+                name: "White Crappie",
+                altName: "",
+                family: "Bass",
+                sciName: "Pomoxis annularis",
+                trophySize: 30,
+                desc: "Lighter than Black Crappie, vertical bars more distinct.",
+                habitat: "Turbid water.",
+                angling: "Minnows.",
+                loc: "Rare, Southern MB.",
+                edibility: "Excellent."
+            }
+        ];
+
+        // --- Application State ---
+        let state = {
+            searchQuery: "",
+            filterFamily: "All",
+            selectedFishId: null
+        };
+
+        // --- DOM Elements ---
+        const fishListContainer = document.getElementById('fishListContainer');
+        const detailPanel = document.getElementById('detailPanel');
+        const searchInput = document.getElementById('searchInput');
+        const familyFilter = document.getElementById('familyFilter');
+        const countDisplay = document.getElementById('countDisplay');
+
+        // --- Logic: Rendering ---
+
+        function renderList() {
+            fishListContainer.innerHTML = '';
+            
+            const filtered = fishDatabase.filter(fish => {
+                const matchesSearch = fish.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
+                                      fish.family.toLowerCase().includes(state.searchQuery.toLowerCase());
+                const matchesFamily = state.filterFamily === "All" || fish.family === state.filterFamily;
+                return matchesSearch && matchesFamily;
+            });
+
+            // Sort alphabetical
+            filtered.sort((a,b) => a.name.localeCompare(b.name));
+
+            countDisplay.innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                fishListContainer.innerHTML = '<div class="p-4 text-stone-400 text-center text-sm">No species found.</div>';
+                return;
+            }
+
+            filtered.forEach(fish => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-stone-100 border-l-4 border-transparent ${state.selectedFishId === fish.id ? 'active-fish' : ''}`;
+                item.onclick = () => selectFish(fish.id);
+                
+                let familyColor = 'text-stone-500';
+                if(fish.family === 'Trout') familyColor = 'text-blue-600';
+                if(fish.family === 'Pike') familyColor = 'text-green-600';
+                if(fish.family === 'Perch') familyColor = 'text-amber-600';
+
+                item.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-stone-700">${fish.name}</span>
+                        <span class="text-xs ${familyColor} font-medium px-2 py-0.5 bg-white rounded border border-stone-200">${fish.family}</span>
+                    </div>
+                    <div class="text-xs text-stone-500 mt-1 truncate">${fish.sciName}</div>
+                `;
+                fishListContainer.appendChild(item);
+            });
+        }
+
+        function renderDetail(id) {
+            const fish = fishDatabase.find(f => f.id === id);
+            if (!fish) return;
+
+            // Simple color coding for header
+            let headerGradient = "from-stone-700 to-stone-900";
+            if(fish.family === "Trout") headerGradient = "from-blue-700 to-blue-900";
+            if(fish.family === "Pike") headerGradient = "from-emerald-700 to-emerald-900";
+            if(fish.family === "Perch") headerGradient = "from-amber-600 to-amber-800";
+            if(fish.family === "Catfish") headerGradient = "from-stone-600 to-stone-800";
+
+            detailPanel.innerHTML = `
+                <div class="card-enter max-w-3xl mx-auto">
+                    <!-- ID Header -->
+                    <div class="bg-gradient-to-r ${headerGradient} text-white p-6 rounded-t-xl shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-3xl font-bold font-serif tracking-wide">${fish.name}</h2>
+                                <p class="text-white/80 italic text-sm mt-1">${fish.sciName}</p>
+                                ${fish.altName ? `<span class="inline-block mt-2 text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">AKA: ${fish.altName}</span>` : ''}
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs uppercase tracking-wider opacity-70">Trophy Size</div>
+                                <div class="text-2xl font-bold">${fish.trophySize}+ cm</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Body -->
+                    <div class="bg-white border-x border-b border-stone-200 rounded-b-xl p-6 shadow-sm space-y-8">
+                        
+                        <!-- Recognition Section -->
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center text-xl">👁️</div>
+                            <div>
+                                <h3 class="text-lg font-bold text-stone-800 mb-2">Identification</h3>
+                                <p class="text-stone-600 leading-relaxed">${fish.desc}</p>
+                            </div>
+                        </div>
+
+                        <!-- Habitat Section -->
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xl">🌊</div>
+                            <div>
+                                <h3 class="text-lg font-bold text-stone-800 mb-2">Habitat & Location</h3>
+                                <p class="text-stone-600 leading-relaxed mb-2">${fish.habitat}</p>
+                                <div class="text-sm font-semibold text-stone-500">Hotspots: <span class="text-stone-700 font-normal">${fish.loc}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Angling Section -->
+                        <div class="bg-stone-50 p-5 rounded-lg border border-stone-200">
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-10 h-10 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center text-xl">🎣</div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-stone-800 mb-2">Angler's Tactics</h3>
+                                    <p class="text-stone-700 leading-relaxed mb-3">${fish.angling}</p>
+                                    
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="px-3 py-1 bg-white border border-stone-300 rounded-full text-xs font-semibold text-stone-600 shadow-sm">Edibility: ${fish.edibility}</span>
+                                        <span class="px-3 py-1 bg-white border border-stone-300 rounded-full text-xs font-semibold text-stone-600 shadow-sm">Family: ${fish.family}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button onclick="document.getElementById('explorer').scrollIntoView({behavior: 'smooth'})" class="text-teal-600 hover:text-teal-800 text-sm font-medium">
+                           ↑ Back to List
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectFish(id) {
+            state.selectedFishId = id;
+            renderList(); // Re-render list to update active state
+            renderDetail(id);
+            // On mobile, scroll to detail
+            if (window.innerWidth < 1024) {
+                detailPanel.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // --- Logic: Analytics (Charts) ---
+        function initCharts() {
+            // Chart 1: Family Distribution
+            const familyCounts = {};
+            fishDatabase.forEach(f => {
+                familyCounts[f.family] = (familyCounts[f.family] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('familyChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(familyCounts),
+                    datasets: [{
+                        data: Object.values(familyCounts),
+                        backgroundColor: [
+                            '#d97706', // Amber (Perch)
+                            '#059669', // Emerald (Pike)
+                            '#2563eb', // Blue (Trout)
+                            '#78716c', // Stone (Bass)
+                            '#4b5563', // Gray (Catfish)
+                            '#a8a29e', // Light Gray (Other)
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Chart 2: Size Comparison (Top 10 Game Fish)
+            const topFish = fishDatabase
+                .filter(f => ['Lake Sturgeon', 'Muskellunge', 'Northern Pike', 'Lake Trout', 'Channel Catfish', 'Arctic Charr', 'Walleye', 'Rainbow Trout', 'Smallmouth Bass', 'Yellow Perch'].includes(f.name))
+                .sort((a,b) => b.trophySize - a.trophySize);
+
+            new Chart(document.getElementById('sizeChart'), {
+                type: 'bar',
+                data: {
+                    labels: topFish.map(f => f.name),
+                    datasets: [{
+                        label: 'Master Angler Min. Length (Approx cm)',
+                        data: topFish.map(f => f.trophySize),
+                        backgroundColor: '#0d9488', // Teal 600
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- Init ---
+        searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            renderList();
+        });
+
+        familyFilter.addEventListener('change', (e) => {
+            state.filterFamily = e.target.value;
+            renderList();
+        });
+
+        // Start
+        renderList();
+        selectFish(1); // Select Walleye by default
+        initCharts();
+
+    </script>
+</body>
+</html>
