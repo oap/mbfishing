@@ -60,7 +60,7 @@
   <select id="species">
     <option value="1=1">Show All Lakes</option>
     <option value="SPECIES LIKE '%Walleye%'">Walleye</option>
-    <option value="SPECIES LIKE '%Northern Pike%'">Northern Pike</option>
+    <option value="SPECIES LIKE '%Northern %'">Northern Pike</option>
     <option value="SPECIES LIKE '%Yellow Perch%'">Yellow Perch</option>
     <option value="SPECIES LIKE '%Smallmouth Bass%'">Smallmouth Bass</option>
     <option value="SPECIES LIKE '%Lake Whitefish%'">Lake Whitefish</option>
@@ -104,17 +104,17 @@
 
     // 1. Handle SOUTHERN DIVISION Hierarchy
     if (div.includes('SOUTH')) {
-      if (special.includes('AREA A')) return '#8e44ad'; // Purple (Area A)
-      if (special.includes('AREA B')) return '#0500d3'; // Dark Orange (Area B)
-      return '#c0392b'; // Standard Red (Southern General)
+      if (special.includes('AREA A')) return '#E69F00'; // Orange (Area A)
+      if (special.includes('AREA B')) return '#CC79A7'; // Reddish Purple (Area B)
+      return '#D55E00'; // Vermilion (Southern General)
     }
 
     // 2. Handle NORTHERN DIVISIONS
-    if (div.includes('NORTH CENTRAL')) return '#2980b9'; // Blue
-    if (div.includes('NORTHEAST'))     return '#16a085'; // Teal
-    if (div.includes('NORTHWEST'))     return '#27ae60'; // Green
+    if (div.includes('NORTH CENTRAL')) return '#56B4E9'; // Blue
+    if (div.includes('NORTHEAST'))     return '#009E73'; // Teal
+    if (div.includes('NORTHWEST'))     return '#0072B2'; // Blue
 
-    return '#95a5a6'; // Grey (Unknown)
+    return '#7F7F7F'; // Grey (Unknown)
   }
 
   // 3. Define the Manitoba Data Layer
@@ -186,14 +186,14 @@
         <b>Fishing Regulations</b><br>
         <hr style="margin:5px 0">
         <b>Southern Division</b><br>
-        <i style="background:#c0392b; width:10px; height:10px; display:inline-block;"></i> General<br>
-        <i style="background:#8e44ad; width:10px; height:10px; display:inline-block;"></i> Area A<br>
-        <i style="background:#0500d3; width:10px; height:10px; display:inline-block;"></i> Area B<br>
+        <i style="background:#D55E00; width:10px; height:10px; display:inline-block;"></i> General<br>
+        <i style="background:#E69F00; width:10px; height:10px; display:inline-block;"></i> Area A<br>
+        <i style="background:#CC79A7; width:10px; height:10px; display:inline-block;"></i> Area B<br>
         <hr style="margin:5px 0">
         <b>Northern Divisions</b><br>
-        <i style="background:#2980b9; width:10px; height:10px; display:inline-block;"></i> North Central<br>
-        <i style="background:#27ae60; width:10px; height:10px; display:inline-block;"></i> Northwest<br>
-        <i style="background:#16a085; width:10px; height:10px; display:inline-block;"></i> Northeast<br>
+        <i style="background:#56B4E9; width:10px; height:10px; display:inline-block;"></i> North Central<br>
+        <i style="background:#0072B2; width:10px; height:10px; display:inline-block;"></i> Northwest<br>
+        <i style="background:#009E73; width:10px; height:10px; display:inline-block;"></i> Northeast<br>
       `;
       return div;
   };
@@ -203,7 +203,7 @@
 
 <footer class="site-footer">
   <div>
-    <small>© 2025 Your Name — Manitoba Fishing Tips. Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
+    <small>© 2025 <a href="chefbig.ca">chefbig.ca</a> — Manitoba Fishing Tips. Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
   </div>
 </footer>
 
