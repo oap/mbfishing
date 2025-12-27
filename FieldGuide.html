@@ -76,21 +76,27 @@
 </head>
 <body class="text-stone-800 antialiased">
 
-    <!-- Navbar / Hero -->
-    <header class="bg-teal-900 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0 text-center md:text-left">
-                    <h1 class="text-3xl md:text-4xl font-bold text-amber-50">Manitoba Angler's Field Guide</h1>
-                    <p class="text-teal-200 mt-2 text-sm md:text-base max-w-xl">
-                        A comprehensive interactive database of the 36+ key fish species found in Manitoba's lakes and rivers. 
-                        Explore identification traits, habitats, and expert angling tactics.
-                    </p>
+    <!-- Unified Header -->
+    <header class="bg-gradient-to-r from-teal-700 to-teal-500 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <h1 class="text-2xl md:text-3xl font-bold">
+                        <a href="index.html" class="text-white hover:opacity-90 no-underline">🎣 Manitoba Fishing Tips</a>
+                    </h1>
+                    <p class="text-sm opacity-90 mt-1">Your Complete Fishing Resource</p>
                 </div>
-                <div class="text-right hidden md:block">
-                    <div class="text-amber-400 font-bold text-lg">100,000+ Lakes</div>
-                    <div class="text-teal-300 text-sm">One Guide.</div>
-                </div>
+                <nav class="flex gap-2 flex-wrap" aria-label="Main navigation">
+                    <a href="index.html" class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-white no-underline font-semibold transition">Home</a>
+                    <a href="FieldGuide.html" class="px-4 py-2 rounded bg-white/30 hover:bg-white/20 text-white no-underline font-semibold transition">Field Guide</a>
+                    <a href="AnglerMap.html" class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-white no-underline font-semibold transition">Angler Map</a>
+                </nav>
+            </div>
+            <div class="mt-4 text-center bg-white/10 rounded p-3">
+                <p class="text-sm">
+                    📋 A comprehensive interactive database of 36+ key fish species. Official regulations: 
+                    <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer" class="text-amber-400 underline">Manitoba Angling Guide</a>
+                </p>
             </div>
         </div>
     </header>
@@ -875,5 +881,17 @@
         initCharts();
 
     </script>
+
+    <!-- Unified Footer -->
+    <footer class="bg-gradient-to-r from-teal-700 to-teal-500 text-white mt-12 py-8 shadow-lg">
+        <div class="container mx-auto px-4 text-center">
+            <p class="font-bold text-lg">🎣 Manitoba Fishing Tips</p>
+            <p class="mt-2 text-sm opacity-90">Your comprehensive guide to fishing in Manitoba's waters</p>
+            <p class="mt-4 text-sm">
+                © 2025 <a href="https://chefbig.ca" class="text-amber-400 hover:underline">chefbig.ca</a> | 
+                <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:underline">Official Manitoba Angling Guide</a>
+            </p>
+        </div>
+    </footer>
 </body>
 </html>

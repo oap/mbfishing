@@ -49,13 +49,65 @@
             padding: var(--spacing);
         }
 
-        header {
-            text-align: center;
+        /* Unified Header Styles */
+        .site-header {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: white;
+            padding: 1.5rem var(--spacing);
+            margin: calc(-1 * var(--spacing));
             margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        h1 {
-            margin-bottom: 1rem;
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .site-branding {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .site-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .site-title a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .site-title a:hover {
+            opacity: 0.9;
+        }
+
+        .site-tagline {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .header-notice {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .header-notice a {
+            color: #fbbf24;
+            text-decoration: underline;
         }
 
         .search-container {
@@ -256,42 +308,75 @@
             font-size: 1rem;
             color: var(--secondary-color);
         }
-        /* Site navigation and footer styles */
+        /* Site navigation styles */
         .site-nav {
             display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin: 0.5rem 0 1rem 0;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-        .site-nav a {
-            color: var(--primary-color);
+
+        .nav-link {
+            color: white;
             text-decoration: none;
             font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s;
+            background: rgba(255,255,255,0.1);
         }
-        .site-nav a:hover {
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Unified Footer Styles */
+        .site-footer {
+            margin-top: 3rem;
+            padding: 2rem var(--spacing);
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-left: calc(-1 * var(--spacing));
+            margin-right: calc(-1 * var(--spacing));
+            margin-bottom: calc(-1 * var(--spacing));
+        }
+
+        .site-footer a {
+            color: #fbbf24;
+            text-decoration: none;
+        }
+
+        .site-footer a:hover {
             text-decoration: underline;
         }
 
-        .site-footer {
-            margin-top: 2rem;
-            padding: 1rem 0;
-            background: transparent;
-            color: var(--secondary-color);
-            text-align: center;
-            font-size: 0.9rem;
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="site-brand">
-            <h1><a href="index.html">Manitoba Fishing Tips</a></h1>
-            <p>For official regulations, refer to the <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></p>
+    <header class="site-header">
+        <div class="header-container">
+            <div class="site-branding">
+                <h1 class="site-title"><a href="index.html">🎣 Manitoba Fishing Tips</a></h1>
+                <p class="site-tagline">Your Complete Fishing Resource</p>
+            </div>
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="FieldGuide.html" class="nav-link">Field Guide</a>
+                <a href="AnglerMap.html" class="nav-link">Angler Map</a>
+            </nav>
         </div>
-        <nav class="site-nav" aria-label="Main navigation">
-            <a href="index.html">Home</a>
-            <a href="AnglerMap.html">Angler Map</a>
-        </nav>
+        <div class="header-notice">
+            <small>📋 Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
+        </div>
         <div class="search-container">
             <input type="text" id="search" placeholder="Search Manitoba fish species..." aria-label="Search fish cards">
         </div>
@@ -304,8 +389,13 @@
     </div>
 
     <footer class="site-footer">
-        <div>
-            <small>© 2025 <a href="https://chefbig.ca" target="_blank" rel="noopener noreferrer">ChefBig</a> — Manitoba Fishing Tips. Official regulations: <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Manitoba Angling Guide</a></small>
+        <div class="footer-content">
+            <p><strong>🎣 Manitoba Fishing Tips</strong></p>
+            <p style="margin: 0.5rem 0;">Your comprehensive guide to fishing in Manitoba's waters</p>
+            <p style="margin-top: 1rem;">
+                <small>© 2025 <a href="https://chefbig.ca">chefbig.ca</a> | 
+                <a href="https://www.gov.mb.ca/nrnd/fish-wildlife/pubs/fish_wildlife/fish/angling-guide.pdf" target="_blank" rel="noopener noreferrer">Official Manitoba Angling Guide</a></small>
+            </p>
         </div>
     </footer>
 
