@@ -11,6 +11,52 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "urrseiyu43");
     </script>
+        <!-- SEO: Meta tags, Open Graph, Twitter Card, canonical, and JSON-LD -->
+        <meta name="description" content="Manitoba Fishing Tips — possession limits, size restrictions, Master Angler lengths, and practical angling tips for Manitoba species.">
+        <link rel="canonical" href="https://mbfishing.chefbig.ca/">
+        <!-- Open Graph -->
+        <meta property="og:site_name" content="Manitoba Fishing Tips">
+        <meta property="og:title" content="Manitoba Fishing Tips — Limits, Sizes & Angling Advice">
+        <meta property="og:description" content="Quick reference for Manitoba fish species: possession limits, size restrictions, Master Angler lengths, and tips.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://mbfishing.chefbig.ca/">
+        <meta property="og:image" content="https://mbfishing.chefbig.ca/images/arctic_char.webp">
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Manitoba Fishing Tips">
+        <meta name="twitter:description" content="Reference for Manitoba fishing limits, sizes and angling tips.">
+        <meta name="twitter:image" content="https://mbfishing.chefbig.ca/images/arctic_char.webp">
+
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "WebSite",
+                    "url": "https://mbfishing.chefbig.ca/",
+                    "name": "Manitoba Fishing Tips",
+                    "description": "Quick reference for Manitoba fish species: possession limits, size restrictions, Master Angler lengths, and angling tips."
+                },
+                {
+                    "@type": "Organization",
+                    "name": "Manitoba Fishing Tips",
+                    "url": "https://mbfishing.chefbig.ca/",
+                    "sameAs": ["https://chefbig.ca"]
+                },
+                {
+                    "@type": "Dataset",
+                    "name": "Manitoba Fish Species",
+                    "description": "A dataset of Manitoba fish species and basic regulations/recognition lengths.",
+                    "url": "https://mbfishing.chefbig.ca/",
+                    "distribution": {
+                        "@type": "DataDownload",
+                        "encodingFormat": "application/json",
+                        "contentUrl": "https://mbfishing.chefbig.ca/species.json"
+                    }
+                }
+            ]
+        }
+        </script>
     <!--
     Design Notes:
     - Assumptions: Comprehensive Manitoba fishing regulations data included. Master Angler lengths are for recognition programs. Always verify current local regulations. Images are placeholders; replace with actual fish images.
@@ -916,18 +962,29 @@
             const imageContainer = document.createElement('div');
             imageContainer.className = 'fish-card__image-container';
 
+            // Use <picture> with WebP fallback and lazy-loading to improve performance.
+            const picture = document.createElement('picture');
+            const webpSrc = fish.imageUrl.replace(/\.[^.]+$/, '.webp');
+            const sourceWebp = document.createElement('source');
+            sourceWebp.type = 'image/webp';
+            sourceWebp.srcset = webpSrc;
+            picture.appendChild(sourceWebp);
+
             const img = document.createElement('img');
             img.className = 'fish-card__image';
             img.src = fish.imageUrl;
-            img.alt = `Image of ${fish.commonName}`;
+            img.alt = `Image of ${fish.commonName} (${fish.scientificName || ''})`;
+            img.loading = 'lazy';
             img.onerror = () => {
-                img.style.display = 'none';
+                // Remove picture and show placeholder if image fails
+                if (picture.parentNode) picture.parentNode.removeChild(picture);
                 const placeholder = document.createElement('div');
                 placeholder.className = 'placeholder-image';
                 placeholder.textContent = 'Image not available';
                 imageContainer.appendChild(placeholder);
             };
-            imageContainer.appendChild(img);
+            picture.appendChild(img);
+            imageContainer.appendChild(picture);
 
             const content = document.createElement('div');
             content.className = 'fish-card__content';

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Sitemap: https://mbfishing.chefbig.ca/sitemap.xml
+# If you need to block specific paths, add Disallow rules below
+# Disallow: /private
