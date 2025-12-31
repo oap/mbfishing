@@ -1,0 +1,246 @@
+[
+  {
+    "id": "arctic-char",
+    "commonName": "Arctic Char",
+    "scientificName": "Salvelinus alpinus",
+    "chineseName": "北极红点鲑",
+    "imageUrl": "images/arctic_char.webp",
+    "quota": { "possessionLimit": 8, "sizeRestriction": "None may exceed 40 cm", "season": "Year-round", "notes": "Except in stocked trout waters" },
+    "tips": ["Fly fishing", "Stream fishing", "Cold water habitats"],
+    "masterAnglerLength": "51 cm (20 in)"
+  },
+  {
+    "id": "arctic-grayling",
+    "commonName": "Arctic Grayling",
+    "scientificName": "Thymallus arcticus",
+    "chineseName": "北极茴鱼",
+    "imageUrl": "images/arctic_grayling.webp",
+    "quota": { "possessionLimit": 3, "sizeRestriction": "None may exceed 40 cm", "season": "Year-round", "notes": "Cold water species" },
+    "tips": ["Dry flies", "Nymph fishing", "Clear streams"],
+    "masterAnglerLength": "46 cm (18 in)"
+  },
+  {
+    "id": "bigmouth-buffalo",
+    "commonName": "Bigmouth Buffalo",
+    "scientificName": "Ictiobus cyprinellus",
+    "chineseName": "大口牛鱼",
+    "imageUrl": "images/bigmouth_buffalo.webp",
+    "quota": { "possessionLimit": 0, "sizeRestriction": "", "season": "Year-round", "notes": "Catch-and-release only" },
+    "tips": ["Bottom fishing", "Cut bait", "Deep water"],
+    "conservation": "Protected species"
+  },
+  {
+    "id": "rainbow-trout",
+    "commonName": "Rainbow Trout",
+    "scientificName": "Oncorhynchus mykiss",
+    "chineseName": "虹鳟",
+    "imageUrl": "images/rainbow_trout.webp",
+    "quota": { "possessionLimit": 3, "sizeRestriction": "Only one may exceed 45 cm", "season": "Year-round in many waters", "notes": "Special waters may differ" },
+    "tips": ["Small spinners and spoons", "Natural baits in slower pools", "Fly fishing with nymphs"],
+    "masterAnglerLength": "51 cm (20 in)"
+  },
+  {
+    "id": "freshwater-drum",
+    "commonName": "Freshwater Drum",
+    "scientificName": "Aplodinotus grunniens",
+    "chineseName": "淡水鼓鱼",
+    "imageUrl": "images/freshwater_drum.webp",
+    "quota": { "possessionLimit": 10, "sizeRestriction": "None may exceed 60 cm", "season": "Year-round", "notes": "Also known as sheepshead" },
+    "tips": ["Minnows", "Nightcrawlers", "Bottom fishing"],
+    "masterAnglerLength": "61 cm (24 in)"
+  },
+  {
+    "id": "goldeye",
+    "commonName": "Goldeye",
+    "scientificName": "Hiodon alosoides",
+    "chineseName": "金眼鱼",
+    "imageUrl": "images/goldeye.webp",
+    "quota": { "possessionLimit": 10, "sizeRestriction": "", "season": "Year-round", "notes": "Either Goldeye or Mooneye" },
+    "tips": ["Minnows", "Small spinners", "River fishing"],
+    "masterAnglerLength": "35.5 cm (14 in)"
+  },
+  {
+    "id": "mooneye",
+    "commonName": "Mooneye",
+    "scientificName": "Hiodon tergisus",
+    "chineseName": "月眼鱼",
+    "imageUrl": "images/mooneye.webp",
+    "quota": { "possessionLimit": 10, "sizeRestriction": "", "season": "Year-round", "notes": "Either Goldeye or Mooneye" },
+    "tips": ["Minnows", "Small spinners", "River fishing"],
+    "masterAnglerLength": "35.5 cm (14 in)"
+  },
+  {
+    "id": "lake-sturgeon",
+    "commonName": "Lake Sturgeon",
+    "scientificName": "Acipenser fulvescens",
+    "chineseName": "湖鲟",
+    "imageUrl": "images/lake_sturgeon.webp",
+    "quota": { "possessionLimit": 0, "sizeRestriction": "", "season": "Year-round", "notes": "Highly protected species" },
+    "tips": ["Large baits", "Deep water", "Strong tackle"],
+    "conservation": "Endangered species - catch-and-release only",
+    "masterAnglerLength": "109 cm (43 in)"
+  },
+  {
+    "id": "lake-whitefish",
+    "commonName": "Lake Whitefish",
+    "scientificName": "Coregonus clupeaformis",
+    "chineseName": "湖白鲑",
+    "imageUrl": "images/lake_whitefish.webp",
+    "quota": { "possessionLimit": 10, "sizeRestriction": "", "season": "Year-round", "notes": "Commercial species" },
+    "tips": ["Bottom fishing", "Worms", "Deep water"],
+    "masterAnglerLength": "56 cm (22 in)"
+  },
+  {
+    "id": "black-crappie",
+    "commonName": "Black Crappie",
+    "scientificName": "Pomoxis nigromaculatus",
+    "chineseName": "黑鲈",
+    "imageUrl": "images/black_crappie.webp",
+    "quota": { "possessionLimit": 6, "sizeRestriction": "None may exceed 35 cm", "season": "Year-round", "notes": "Popular panfish" },
+    "tips": ["Minnows", "Small jigs", "Brush piles"],
+    "masterAnglerLength": "30.5 cm (12 in)"
+  },
+  {
+    "id": "brook-trout",
+    "commonName": "Brook Trout",
+    "scientificName": "Salvelinus fontinalis",
+    "chineseName": "溪鳟",
+    "imageUrl": "images/brook_trout.webp",
+    "quota": { "possessionLimit": 1, "sizeRestriction": "None may exceed 45 cm", "season": "Year-round", "notes": "Except in stocked trout waters" },
+    "tips": ["Fly fishing", "Worms", "Small spinners"],
+    "masterAnglerLength": "51 cm (20 in)"
+  },
+  {
+    "id": "brown-bullhead",
+    "commonName": "Brown Bullhead",
+    "scientificName": "Ameiurus nebulosus",
+    "chineseName": "褐牛头鱼",
+    "imageUrl": "images/brown_bullhead.webp",
+    "quota": { "possessionLimit": 25, "sizeRestriction": "", "season": "Year-round", "notes": "Common catfish species" },
+    "tips": ["Worms", "Cut bait", "Liver"],
+    "masterAnglerLength": "30.5 cm (12 in)"
+  },
+  {
+    "id": "burbot",
+    "commonName": "Burbot",
+    "scientificName": "Lota lota",
+    "chineseName": "江鳕",
+    "imageUrl": "images/burbot.webp",
+    "quota": { "possessionLimit": 6, "sizeRestriction": "None may exceed 70 cm", "season": "Winter", "notes": "Cold water species" },
+    "tips": ["Ice fishing", "Minnows", "Night fishing"],
+    "masterAnglerLength": "76 cm (30 in)"
+  },
+  {
+    "id": "muskellunge",
+    "commonName": "Muskellunge",
+    "scientificName": "Esox masquinongy",
+    "chineseName": "麝香狗鱼",
+    "imageUrl": "images/muskellunge.webp",
+    "quota": { "possessionLimit": 0, "sizeRestriction": "", "season": "Year-round", "notes": "Catch-and-release only" },
+    "tips": ["Large lures", "Topwater baits", "Weeds and structure"],
+    "conservation": "Rare and protected",
+    "masterAnglerLength": "79 cm (31 in)"
+  },
+  {
+    "id": "rock-bass",
+    "commonName": "Rock Bass",
+    "scientificName": "Ambloplites rupestris",
+    "chineseName": "岩鲈",
+    "imageUrl": "images/rock_bass.webp",
+    "quota": { "possessionLimit": 6, "sizeRestriction": "", "season": "Year-round", "notes": "Rocky habitat" },
+    "tips": ["Small jigs", "Worms", "Rocky bottoms"],
+    "masterAnglerLength": "25.5 cm (10 in)"
+  },
+  {
+    "id": "smallmouth-bass",
+    "commonName": "Smallmouth Bass",
+    "scientificName": "Micropterus dolomieu",
+    "chineseName": "小口黑鲈",
+    "imageUrl": "images/smallmouth_bass.webp",
+    "quota": { "possessionLimit": 4, "sizeRestriction": "None may exceed 45 cm", "season": "Year-round", "notes": "River and stream species" },
+    "tips": ["Crawfish imitations", "Tube baits", "Rocky structure"],
+    "masterAnglerLength": "46 cm (18 in)"
+  },
+  {
+    "id": "white-bass",
+    "commonName": "White Bass",
+    "scientificName": "Morone chrysops",
+    "chineseName": "白鲈",
+    "imageUrl": "images/white_bass.webp",
+    "quota": { "possessionLimit": 10, "sizeRestriction": "", "season": "Year-round", "notes": "Schooling fish" },
+    "tips": ["Topwater lures", "Small spinners", "Current breaks"],
+    "masterAnglerLength": "38 cm (15 in)"
+  },
+  {
+    "id": "catfish",
+    "commonName": "Channel Catfish",
+    "scientificName": "Ictalurus punctatus",
+    "chineseName": "渠鲶",
+    "imageUrl": "images/channel_catfish.webp",
+    "quota": { "possessionLimit": 4, "sizeRestriction": "None may exceed 60 cm", "season": "Year-round", "notes": "No closed season in most states" },
+    "tips": ["Cut bait or stink baits", "Fish at night", "Bottom rigs with heavy weights"],
+    "conservation": "Popular for food fishing",
+    "masterAnglerLength": "86.5 cm (34 in)"
+  },
+  {
+    "id": "lake-trout",
+    "commonName": "Lake Trout",
+    "scientificName": "Salvelinus namaycush",
+    "chineseName": "湖鳟",
+    "imageUrl": "images/lake_trout.webp",
+    "quota": { "possessionLimit": 1, "sizeRestriction": "None may exceed 65 cm", "season": "Year-round", "notes": "Deep water fishing" },
+    "tips": ["Deep water trolling", "Minnow baits", "Cold water periods"],
+    "conservation": "Slow growing species",
+    "masterAnglerLength": "89 cm (35 in)"
+  },
+  {
+    "id": "common-carp",
+    "commonName": "Common Carp",
+    "scientificName": "Cyprinus carpio",
+    "chineseName": "鲤鱼",
+    "imageUrl": "images/common_carp.webp",
+    "quota": { "possessionLimit": "No limit", "sizeRestriction": "No restriction", "season": "Year-round", "notes": "Invasive species" },
+    "tips": ["Boilies", "Corn", "Bottom fishing"],
+    "masterAnglerLength": "76 cm (30 in)"
+  },
+  {
+    "id": "sucker",
+    "commonName": "Sucker",
+    "scientificName": "Catostomus spp.",
+    "chineseName": "吸盘鱼",
+    "imageUrl": "images/sucker.webp",
+    "quota": { "possessionLimit": "No limit", "sizeRestriction": "No restriction", "season": "Year-round", "notes": "Various sucker species" },
+    "tips": ["Worms", "Insects", "Current edges"],
+    "masterAnglerLength": "46 cm (18 in)"
+  },
+  {
+    "id": "sunfish",
+    "commonName": "Sunfish",
+    "scientificName": "Lepomis spp.",
+    "chineseName": "太阳鱼",
+    "imageUrl": "images/sunfish.webp",
+    "quota": { "possessionLimit": "No limit", "sizeRestriction": "No restriction", "season": "Year-round", "notes": "Various sunfish species" },
+    "tips": ["Worms", "Insects", "Shallow water"],
+    "masterAnglerLength": "18 cm (7 in)"
+  },
+  {
+    "id": "tiger-trout",
+    "commonName": "Tiger Trout",
+    "scientificName": "Salmo trutta × Salvelinus fontinalis",
+    "chineseName": "虎鳟",
+    "imageUrl": "images/tiger_trout.webp",
+    "quota": { "possessionLimit": "No limit", "sizeRestriction": "No restriction", "season": "Year-round", "notes": "Hybrid trout species" },
+    "tips": ["Fly fishing", "Streamers", "Cold water"],
+    "masterAnglerLength": "51 cm (20 in)"
+  },
+  {
+    "id": "tullibee",
+    "commonName": "Tullibee (Cisco)",
+    "scientificName": "Coregonus artedi",
+    "chineseName": "湖白鲑",
+    "imageUrl": "images/tullibee.webp",
+    "quota": { "possessionLimit": "No limit", "sizeRestriction": "No restriction", "season": "Year-round", "notes": "Deep water species" },
+    "tips": ["Trolling", "Deep water", "Small lures"],
+    "masterAnglerLength": "40.5 cm (16 in)"
+  }
+]
